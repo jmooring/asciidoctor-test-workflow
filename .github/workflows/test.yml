@@ -1,0 +1,42 @@
+on:
+  push:
+    branches: [main]
+  pull_request:
+name: Test
+permissions:
+  contents: read
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest] # macos-latest
+    runs-on: ${{ matrix.os }}
+    env:
+      ASCIIDOCTOR_VERSION: '2.0.26'
+      ASCIIDOCTOR_DIAGRAM_VERSION: '3.0.1'
+      ASCIIDOCTOR_DIAGRAM_PLANTUML_VERSION: '1.2025.3'
+      JAVA_VERSION: '25'
+      RUBY_VERSION: '3.4.5'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          java-package: jre
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ env.RUBY_VERSION }}
+      - name: Install gems
+        run: |
+          gem install asciidoctor -v ${{ env.ASCIIDOCTOR_VERSION }}
+          gem install asciidoctor-diagram -v ${{ env.ASCIIDOCTOR_DIAGRAM_VERSION }}
+          gem install asciidoctor-diagram-plantuml -v ${{ env.ASCIIDOCTOR_DIAGRAM_PLANTUML_VERSION }}
+      - name: Verify versions
+        run: |
+          echo "Java: $(java --version)"
+          echo "Ruby: $(ruby --version)"
+          echo "Asciidoctor: $(asciidoctor --version)"
